@@ -1,7 +1,9 @@
 ﻿using AES.ApiTemplate.Services.Context;
 using AES.ApiTemplate.Services.Interfaces;
 using AES.ApiTemplate.Services.Services;
+using System;
 using System.Data;
+using System.Collections.Generic;
 using static Dapper.SqlMapper;
 using System.Data.Common;
 using Microsoft.Extensions.Configuration;
@@ -9,6 +11,10 @@ using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
 using AES.ApiTemplate.Models.Models;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using System.Dynamic;
+using System.Reflection;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+
 
 namespace AES.ApiTemplate.Services.Repository
 {
@@ -30,9 +36,21 @@ namespace AES.ApiTemplate.Services.Repository
             this._dapper = dapper;
         }
 
-        public Task Add(T product)
+        public Task<T> Add(T product)
         {
-            throw new NotImplementedException();
+            var modelType = typeof(T);
+            var tableName = modelType.Name;
+            var properties = modelType.GetProperties()
+                .Where(p => !p.Name.Equals("Id", StringComparison.OrdinalIgnoreCase) &&
+                          !p.Name.Equals($"{tableName}Id", StringComparison.OrdinalIgnoreCase)).ToArray();
+            var columns = properties.Select(p => p.Name);
+            var columnValues = properties.Select(p => ConvertToSqlValue(p.GetValue(product), p.PropertyType));
+            var insertQuery = $"INSERT INTO [{tableName}] ({string.Join(", ", columns)}) values ({string.Join(", ", columnValues)})";
+
+            var result = Task.FromResult(_dapper.Insert<T>(insertQuery, null, CommandType.Text));
+            return result;
+            //return result;
+            //throw new NotImplementedException();
         }
 
         public Task Delete(T product)
@@ -52,6 +70,12 @@ namespace AES.ApiTemplate.Services.Repository
             return result;
         }
 
+        public async Task<IReadOnlyList<T>> GetAll(string storedprocedure)
+        {
+            var result = await Task.FromResult(_dapper.GetAll<T>(storedprocedure, null, CommandType.Text));
+            return result;
+        }
+
         public async Task<T> GetById(int id)
         {
             var type = typeof(T).Name;
@@ -63,6 +87,21 @@ namespace AES.ApiTemplate.Services.Repository
         public Task Update(int id, T product)
         {
             throw new NotImplementedException();
+        }
+
+        private string ConvertToSqlValue(object value, Type type)
+        {
+            if (type == typeof(string))
+                return $"'{value}'";
+            else if (type == typeof(DateTime))
+                return $"'{((DateTime)value).ToString("yyyy-MM-dd HH:mm:ss")}'";
+            else if (type == typeof(Boolean))
+                return value.ToString().ToLower() == "true" ? "1" : "0";
+            else if (value == null)
+                return "NULL";
+
+            else
+                return value.ToString();
         }
     }
 }

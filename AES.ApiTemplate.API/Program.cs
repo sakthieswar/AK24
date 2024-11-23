@@ -4,13 +4,16 @@ using AES.ApiTemplate.Services.Interfaces;
 using AES.ApiTemplate.Services.Repository;
 using AES.ApiTemplate.Services.Services;
 using Microsoft.Extensions.DependencyInjection;
+using NLog;
+using NLog.Web;
 //using Microsoft.Data.SqlClient;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
 //Enable CORS
 builder.Services.AddCors(p => {
-    p.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+    p.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()); //.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 });
 
 // Add services to the container.
@@ -19,6 +22,7 @@ builder.Services.AddSingleton<DbStoreContext>();
 builder.Services.AddScoped<IDapperr, Dapperr>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -27,6 +31,8 @@ builder.Services.AddSwaggerGen();
 
 //var connectionString = builder.Configuration.GetConnectionString("SqlConnection") ?? default!;
 //builder.Services.AddTransient<IUnitOfWork>(sp => new UnitOfWork(connectionString));
+
+
 
 var app = builder.Build();
 
@@ -39,6 +45,8 @@ if (app.Environment.IsDevelopment())
 //var connection = new SqlConnection(connectionString);
 
 app.UseHttpsRedirection();
+
+app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
 app.UseAuthorization();
 
