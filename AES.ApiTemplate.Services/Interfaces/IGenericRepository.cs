@@ -10,8 +10,9 @@ namespace AES.ApiTemplate.Services.Interfaces
     public interface IGenericRepository<T> where T : BaseEntity
     {
         Task<IReadOnlyList<T>> GetAll();
+        Task<IReadOnlyList<T>> GetAll(string storedprocedure);
         Task<T> GetById(int id);
-        Task Add(T product);
+        Task<T> Add(T product);
         Task Update(int id, T product);
         Task Delete(T product);
     }

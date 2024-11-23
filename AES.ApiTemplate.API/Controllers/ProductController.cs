@@ -1,6 +1,7 @@
 ﻿//using AES.ApiTemplate.CoreServices.Repository;
 using AES.ApiTemplate.Models.Models;
 using AES.ApiTemplate.Services.Interfaces;
+using AES.ApiTemplate.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AES.ApiTemplate.API.Controllers
@@ -10,19 +11,26 @@ namespace AES.ApiTemplate.API.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILoggerManager _logger;
         //private IUnitOfWorkFactory _unitOfWorkFactory;    
 
 
-        public ProductController(IUnitOfWork unitOfWork)
+        public ProductController(IUnitOfWork unitOfWork, ILoggerManager logger)
         {
             //this.dapper = dapper;
             this._unitOfWork = unitOfWork;
+            this._logger = logger;
         }
 
         [HttpGet]
         [Route("GetProducts")]
         public async Task<IReadOnlyList<Product>> GetProducts()
         {
+            _logger.LogInfo("Here is info message from the controller.");
+            _logger.LogDebug("Here is debug message from the controller.");
+            _logger.LogWarn("Here is warn message from the controller.");
+            _logger.LogError("Here is error message from the controller.");
+
             IReadOnlyList<Product> ss = await _unitOfWork.Repository<Product>().GetAll();
             return ss;
         }
@@ -33,6 +41,14 @@ namespace AES.ApiTemplate.API.Controllers
             Product ss = await _unitOfWork.Repository<Product>().GetById(id);
             return ss;
         }
+        [HttpPost]
+        [Route("AddProduuct")]
+        public async Task AddProduuct(Product  product)
+        {
+            Product prd = new Product() { name = "UOW Product", description= "UOW Product" };
+            var res = await _unitOfWork.Repository<Product>().Add(product);
+        }
+
         //public ProductController(IUnitOfWorkFactory unitOfWorkFactory)
         //{
         //    //this.dapper = dapper;
