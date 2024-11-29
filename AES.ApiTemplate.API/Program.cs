@@ -1,12 +1,10 @@
-//using AES.ApiTemplate.CoreServices.Repository;
+
+using AES.ApiTemplate.BL.BuisnessLogic;
+using AES.ApiTemplate.BL.Interfaces;
 using AES.ApiTemplate.Services.Context;
 using AES.ApiTemplate.Services.Interfaces;
 using AES.ApiTemplate.Services.Repository;
 using AES.ApiTemplate.Services.Services;
-using Microsoft.Extensions.DependencyInjection;
-using NLog;
-using NLog.Web;
-//using Microsoft.Data.SqlClient;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +21,10 @@ builder.Services.AddScoped<IDapperr, Dapperr>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
+
+builder.Services.AddScoped<IProductBuisnessLayer, ProductBuisnessLayer>();
+builder.Services.AddScoped<IUserBuisnessLayer, UserBuisnessLayer>();
+
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
