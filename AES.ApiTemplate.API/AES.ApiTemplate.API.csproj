@@ -19,8 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AES.ApiTemplate.BL\AES.ApiTemplate.BL.csproj" />
     <ProjectReference Include="..\AES.ApiTemplate.Models\AES.ApiTemplate.Models.csproj" />
-    <ProjectReference Include="..\AES.ApiTemplate.Services\AES.ApiTemplate.Services.csproj" />
   </ItemGroup>
 
 </Project>

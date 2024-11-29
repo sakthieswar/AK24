@@ -1,5 +1,5 @@
-﻿using AES.ApiTemplate.Models.Models;
-using AES.ApiTemplate.Services.Interfaces;
+﻿using AES.ApiTemplate.BL.Interfaces;
+using AES.ApiTemplate.Models.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AES.ApiTemplate.API.Controllers
@@ -8,26 +8,24 @@ namespace AES.ApiTemplate.API.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IUnitOfWork _unitOfWork;
-        public UserController(IUnitOfWork unitOfWork)
+        private readonly IUserBuisnessLayer _userBL;
+
+        public UserController(IUserBuisnessLayer userBL)
         {
-            this._unitOfWork = unitOfWork;
+            this._userBL = userBL;
         }
         [HttpGet]
         [Route("GetUsers")]
         public async Task<IReadOnlyList<User>> GetUsers()
         {
-            string storedprocedure = "sp_getUsers";
-            IReadOnlyList<User> ss = await _unitOfWork.Repository<User>().GetAll(storedprocedure);
-            return ss;
+            return await _userBL.GetUsers();
         }
         
         [HttpPost]
         [Route("AddUser")]
-        public async Task AddUser(User product)
+        public async Task AddUser(User user)
         {
-            //User prd = new User() { name = "UOW Product", description = "UOW Product" };
-            var res = await _unitOfWork.Repository<User>().Add(product);
+           await _userBL.AddUser(user);
         }
     }
 }
